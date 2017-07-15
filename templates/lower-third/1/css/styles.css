@@ -1,0 +1,43 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,body {
+	background-color: #111116; /* Black */
+}
+
+body {
+  position: absolute;
+  width: 1280px;
+  height: 720px;
+  color: white;
+  font-family: Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.vba-area {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  background: none;
+  overflow: hidden;
+}
+
+.draw-rectline {
+  width: 1280px;
+  height: 720px;
+}
+
+p {
+  left: -900px;
+}
+
+button {
+  width: 100px;
+  height: 50px;
+  border-radius: 10px;
+  font-size: 1em;
+}

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>Lower Third</title>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <link href="./css/styles.css" rel="stylesheet">
+
+  <script src="./assets/anime.min.js"></script>
+  <script type="text/javascript" src = 'options.json'></script>
+
+</head>
+
+<body>
+
+    <div class = "vba-area">
+        <canvas></canvas>
+    </div>
+    
+    <div id="vba-buttons" style="display: block; position: fixed; right: 100px; top: 50px;">
+      <button type="button" onclick="animationPlayToggle(); return false;">
+        Replay
+      </button>
+      <button type="button" onclick="animationPlay(); return false;">
+        Play
+      </button>
+      <button type="button" onclick="animationPause(); return false;">
+        Pause
+      </button>
+    </div>    
+
+<script>
+
+    var options = JSON.parse(options);
+
+    var canvasEl = document.querySelector('canvas');
+    var ctx = canvasEl.getContext('2d');
+
+    function setCanvasSize() {
+        canvasEl.width = canvasEl.parentNode.offsetWidth;
+        canvasEl.height = canvasEl.parentNode.offsetHeight;
+        canvasEl.style.width = canvasEl.parentNode.offsetWidth + 'px';
+        canvasEl.style.height = canvasEl.parentNode.offsetHeight + 'px';
+    }
+
+    var colors = [
+        '#e9b642',
+        '#ffffff',
+        '#5A87FF',
+        '#FBF38C'
+    ];
+
+    var easings = [
+        'easeInOutExpo',
+        'easeInOutSine',
+        'easeInOutQuad',
+        'easeInOutCubic'       
+    ];
+
+    var lineColor =2; // index of colors[], it paints the selected color to border.
+
+    var rectX = options.rectX;
+    var rectY = options.rectY;
+    var rectWidth = options.rectWidth;
+    var rectHeight = options.rectHeight;
+    var cornerRadius = options.cornerRadius;
+    var lineWidth = options.lineWidth;
+    
+    var animDuration = 1300; // duration of line animation
+    var wholeLength = 2 * (rectWidth + rectHeight + Math.PI * cornerRadius - cornerRadius * 4);//total length of arc
+    
+    var title = options.title;
+    var desc = options.desc;
+    var titlefontsize = 65;
+    var descfontsize = 30;
+    var titlefont,descfont;
+    
+    var lineSpacing = 10;//the spacing between title and description
+    var marginTop = 30;
+    var marginLeft = 30;
+    var textAnimStartingPoint = -1000;
+    var textAnimDuration = 2000;
+    var titleDelay = 0;
+    var descDelay = 0;
+    var stopTime = 2000;
+    
+    /* animation effect (0~2) */
+
+    var arcEffect = 2;
+    var titleEffect = 0;
+    var descEffect = 0;
+    
+    var rectDelay = 200;
+    var lineOffset = 300;
+    var titleOffset = 200;
+    var descOffset = 500;
+
+    var lines=[];
+    lines.push({x: rectX + rectWidth,y: rectY + rectHeight / 2, status: 0, len: rectHeight / 2 - cornerRadius});
+    lines.push({x: rectX + rectWidth,y: rectY + rectHeight - cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
+    lines.push({x: rectX + rectWidth - cornerRadius, y: rectY + rectHeight, status: 0, len: rectWidth - cornerRadius * 2});
+    lines.push({x: rectX + cornerRadius, y:rectY + rectHeight, status: 1, len: Math.PI * cornerRadius / 2});
+    lines.push({x: rectX, y: rectY + rectHeight - cornerRadius, status: 0, len: rectHeight - 2 * cornerRadius});
+    lines.push({x: rectX, y: rectY + cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
+    lines.push({x: rectX + cornerRadius, y: rectY, status:0, len: rectWidth - 2 * cornerRadius});
+    lines.push({x: rectX + rectWidth-cornerRadius, y: rectY, status: 1, len: Math.PI * cornerRadius / 2});
+    lines.push({x: rectX + rectWidth, y: rectY + cornerRadius, status: 0, len: rectHeight / 2 - cornerRadius});
+
+    function clearCorner(){
+        ctx.clearRect(rectX, rectY - cornerRadius, rectWidth , 2 * cornerRadius);
+        ctx.clearRect(rectX + rectWidth - lineWidth / 2, rectY, lineWidth * 2, rectHeight);
+        ctx.clearRect(rectX, rectY + rectHeight - cornerRadius, rectWidth, 2 * cornerRadius);
+        ctx.clearRect(rectX - lineWidth / 2, rectY, lineWidth+1, rectHeight);
+    }
+
+    function drawing(arc, lineColor){
+            
+        i = 0;
+        var tlen = 0;
+
+        ctx.beginPath();
+        ctx.moveTo(rectX+rectWidth,rectY+rectHeight/2);
+
+        while (i < lines.length && arc >= tlen)
+        {
+            tlen += lines[i].len;
+            
+            if( arc > tlen )
+            {
+            
+                if(lines[i].status==0){
+                    var endPoint = (i + 1) % 8;
+                    ctx.lineTo(lines[endPoint].x, lines[endPoint].y);
+                }
+                else{
+                    switch(i){
+                        case 1:
+                            ctx.arcTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - cornerRadius, rectY + rectHeight, cornerRadius);
+                            break;
+                        case 3:
+                            ctx.arcTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight-cornerRadius, cornerRadius);
+                            break;
+                        case 5:
+                            ctx.arcTo(rectX, rectY, rectX + cornerRadius, rectY, cornerRadius);
+                            break;
+                        case 7:
+                            ctx.arcTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + cornerRadius, cornerRadius);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            else {
+                routeProgress = lines[i].len - (tlen - arc);
+
+                if(lines[i].status == 1){
+                    var radian = routeProgress/cornerRadius; 
+                    switch(i){
+                        case 1:
+                            ctx.arc(rectX + rectWidth - cornerRadius, rectHeight + rectY - cornerRadius, cornerRadius, 0, radian);
+                            break;
+                        case 3:
+                            ctx.arc(rectX + cornerRadius, rectY + rectHeight - cornerRadius, cornerRadius, Math.PI/2, Math.PI/2 + radian);
+                            break;
+                        case 5:
+                            ctx.arc(rectX + cornerRadius, rectY + cornerRadius, cornerRadius, Math.PI, Math.PI + radian);
+                            break;
+                        case 7:
+                            ctx.arc(rectX + rectWidth - cornerRadius, rectY + cornerRadius,cornerRadius, Math.PI * 1.5, 1.5 * Math.PI + radian);
+                            break;
+                        default:
+                            break;
+                    }                    
+                }
+                else{
+                    switch(i){
+                        case 0:
+                            ctx.lineTo(rectX + rectWidth, rectHeight/2 + rectY + routeProgress);
+                            break;
+                        case 2:
+                            ctx.lineTo(rectX + rectWidth - cornerRadius - routeProgress, rectY + rectHeight);
+                            break;
+                        case 4:
+                            ctx.lineTo(rectX, rectY + rectHeight - cornerRadius - routeProgress);
+                            break;
+                        case 6:
+                            ctx.lineTo(rectX + cornerRadius + routeProgress, rectY);
+                            break;
+                        case 8:
+                            ctx.lineTo(rectX + rectWidth, rectY + cornerRadius + routeProgress);
+                            break;
+                        default:
+                            break;                                                                               
+                    }
+                }
+            }
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = colors[lineColor];
+            ctx.stroke();  
+            i++;
+        }
+    }
+
+    function createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius, linewidth){
+        
+        var p = {};
+        p.routeProgress = 0;
+        p.colorDiff = 500;
+        
+        p.draw = function(arc){
+
+            var tlen = 0;
+            clearCorner();
+
+            drawing(arc, 0);
+            drawing(arc-p.colorDiff, 1);
+
+        };
+        return p;
+    }
+
+    var rectObj = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 0);
+    var rectObj1 = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 1);
+
+    function renderParticule(anim) {
+        for (var i = 0; i < anim.animatables.length; i++) {
+            var animation = anim.animatables[i].target;
+            animation.draw(animation.routeProgress);            
+        }        
+    }
+
+    function createText(text, x, y, fontSize, font, textcolor){
+        var p = {};
+        p.x = x;
+        p.y = y;
+        p.fontSize = fontSize;
+        p.fillStyle = colors[textcolor];
+        p.draw = function() {
+            ctx.textBaseline = 'top';
+            ctx.clearRect(rectX + lineWidth / 2, p.y , rectWidth - lineWidth-2, p.fontSize + lineSpacing);
+            ctx.font = 'italic bold ' + p.fontSize + 'px Arial';
+            ctx.fillStyle = colors[textcolor];
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'italic';
+            ctx.fillText(text, p.x, p.y);
+            ctx.clearRect(0, rectY, rectX - lineWidth / 2, rectHeight);
+            
+        };
+        return p;
+    }
+
+    var mainOptions = {
+        isPaused: false,
+        isRendering: false
+    };
+
+    ctx.textBaseline = 'top';
+    var titletext = createText(title,textAnimStartingPoint, rectY + marginTop, titlefontsize,titlefont,0);        
+    var desctext = createText(desc,textAnimStartingPoint, rectY + marginTop + titlefontsize + lineSpacing, descfontsize,descfont,1);
+
+    setCanvasSize();
+
+
+    var timeline = anime.timeline({
+        loop: false,
+        autoplay: true,
+    });
+    timeline.add({
+        targets: rectObj,
+        duration: animDuration,
+        routeProgress: wholeLength,
+        colorDiff: 0,
+        easing: easings[arcEffect],
+        autoplay: true,
+        delay: rectDelay,
+        update: renderParticule,
+        offset: lineOffset
+      })
+    .add({
+        targets: titletext,
+        x:[textAnimStartingPoint, rectX + marginLeft],
+        delay: titleDelay,
+        duration: textAnimDuration,
+        easing: easings[titleEffect],
+        update: renderParticule,
+        offset: titleOffset
+    })
+    .add({
+        targets: desctext,
+        x: [textAnimStartingPoint, rectX + marginLeft],
+        duration: textAnimDuration,
+        delay: descDelay,
+        easing: easings[descEffect],
+        update: renderParticule,
+        offset: descOffset,
+        complete: function(anim) {
+            timeline.reverse();
+            mainOptions.isPaused = true;
+            setTimeout(function(){
+                mainOptions.isPaused = false;
+                timeline.play();
+            }, stopTime);
+        }        
+      });
+
+        var animationPlayToggle = function(){
+            timeline.restart();
+        };
+
+        var animationPlay = function(){
+            if( mainOptions.isPaused ){
+                return;
+            }
+            timeline.play();
+        };
+
+        var animationPause = function(){
+            if( mainOptions.isPaused ){
+                return;
+            }
+            timeline.pause();
+        };
+
+  </script>
+</body>
+</html>
