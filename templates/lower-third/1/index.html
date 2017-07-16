@@ -33,9 +33,21 @@
     </div>    
 
 <script>
+    
+    var request;
 
-    var options = JSON.parse(options);
-
+    if (window.XMLHttpRequest) {
+        request = new XMLHttpRequest();
+    } else {
+        request =  ActiveXObject("Microsoft.XMLHTTP");
+    }
+    request.open("GET", "options.json");
+    request.onreadystatechange = function(){
+        if ((request.readyState===4) && (request.staus===200)) {
+            var items = JSON.parse(request.responseText);
+            console.log(items);
+        }
+    }
     var canvasEl = document.querySelector('canvas');
     var ctx = canvasEl.getContext('2d');
 
@@ -62,23 +74,30 @@
 
     var lineColor =2; // index of colors[], it paints the selected color to border.
 
-    var rectX = options.rectX;
-    var rectY = options.rectY;
-    var rectWidth = options.rectWidth;
-    var rectHeight = options.rectHeight;
-    var cornerRadius = options.cornerRadius;
-    var lineWidth = options.lineWidth;
+    var rectX = 100;
+    var rectY = 500;
+    var rectWidth = 750;
+    var rectHeight = 150;
+    var cornerRadius = 20;
+    var lineWidth = 3;
+
+    // var rectX = options.rectX;
+    // var rectY = options.rectY;
+    // var rectWidth = options.rectWidth;
+    // var rectHeight = options.rectHeight;
+    // var cornerRadius = options.cornerRadius;
+    // var lineWidth = options.lineWidth;
     
     var animDuration = 1300; // duration of line animation
     var wholeLength = 2 * (rectWidth + rectHeight + Math.PI * cornerRadius - cornerRadius * 4);//total length of arc
     
-    var title = options.title;
-    var desc = options.desc;
+    var title = "Title";
+    var desc = "Description";
     var titlefontsize = 65;
     var descfontsize = 30;
     var titlefont,descfont;
     
-    var lineSpacing = 10;//the spacing between title and description
+    var lineSpacing = 0;//the spacing between title and description
     var marginTop = 30;
     var marginLeft = 30;
     var textAnimStartingPoint = -1000;
@@ -241,7 +260,7 @@
         p.fillStyle = colors[textcolor];
         p.draw = function() {
             ctx.textBaseline = 'top';
-            ctx.clearRect(rectX + lineWidth / 2, p.y , rectWidth - lineWidth-2, p.fontSize + lineSpacing);
+            ctx.clearRect(rectX + lineWidth / 2, p.y , rectWidth - lineWidth - marginLeft, p.fontSize * 1.4 + lineSpacing);
             ctx.font = 'italic bold ' + p.fontSize + 'px Arial';
             ctx.fillStyle = colors[textcolor];
             ctx.textAlign = 'left';
@@ -258,7 +277,6 @@
         isRendering: false
     };
 
-    ctx.textBaseline = 'top';
     var titletext = createText(title,textAnimStartingPoint, rectY + marginTop, titlefontsize,titlefont,0);        
     var desctext = createText(desc,textAnimStartingPoint, rectY + marginTop + titlefontsize + lineSpacing, descfontsize,descfont,1);
 
