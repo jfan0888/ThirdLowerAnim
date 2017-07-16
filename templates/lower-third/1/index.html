@@ -35,19 +35,20 @@
 <script>
     
     var request;
+    var options;
 
     if (window.XMLHttpRequest) {
         request = new XMLHttpRequest();
     } else {
         request =  ActiveXObject("Microsoft.XMLHTTP");
     }
-    request.open("GET", "options.json");
-    request.onreadystatechange = function(){
-        if ((request.readyState===4) && (request.staus===200)) {
-            var items = JSON.parse(request.responseText);
-            console.log(items);
-        }
+    request.open("GET", "options.json", true);
+    if ((request.readyState===4) && (request.status===200)) {
+        options = JSON.parse(request.responseText);
     }
+    request.send(null);
+    console.log(options);
+
     var canvasEl = document.querySelector('canvas');
     var ctx = canvasEl.getContext('2d');
 
@@ -97,8 +98,8 @@
     var descfontsize = 30;
     var titlefont,descfont;
     
-    var lineSpacing = 0;//the spacing between title and description
-    var marginTop = 30;
+    var lineSpacing = 10;//the spacing between title and description
+    var marginTop = 20;
     var marginLeft = 30;
     var textAnimStartingPoint = -1000;
     var textAnimDuration = 2000;
@@ -260,14 +261,13 @@
         p.fillStyle = colors[textcolor];
         p.draw = function() {
             ctx.textBaseline = 'top';
-            ctx.clearRect(rectX + lineWidth / 2, p.y , rectWidth - lineWidth - marginLeft, p.fontSize * 1.4 + lineSpacing);
+            ctx.clearRect(rectX + lineWidth / 2, p.y , rectWidth - lineWidth - marginLeft, p.fontSize * 1.1);
             ctx.font = 'italic bold ' + p.fontSize + 'px Arial';
             ctx.fillStyle = colors[textcolor];
             ctx.textAlign = 'left';
             ctx.fillStyle = 'italic';
             ctx.fillText(text, p.x, p.y);
             ctx.clearRect(0, rectY, rectX - lineWidth / 2, rectHeight);
-            
         };
         return p;
     }
