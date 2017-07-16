@@ -1,13 +1,101 @@
 [{
-    "caption": "Sample",
+    "caption": "Lower Third Animation 1",
     "duration": 3000,
+    "delay": 1000,
+    "startX": 100,
+    "startY": 500,
+    "marginLeft": 30,
+    "marginTop": 20,
+    "textAnimStartingPoint": -1000,
+    "lineSpacing": 10,
     "options": [
         [
             {
-                "name": "text",
-                "caption": "Text",
+                "name": "Box_Width",
+                "caption": "Box Width",
+                "type": "pixel",
+                "value": "800",
+                "quotes": true
+            },
+            {
+                "name": "Box_Height",
+                "caption": "Box Height",
+                "type": "pixel",
+                "value": "150",
+                "quotes": true
+            },            
+            {
+                "name": "Box_Radius",
+                "caption": "Box Corner Radius",
+                "type": "pixel",
+                "value": "20",
+                "quotes": true
+            },
+            {
+                "name": "Line_Width",
+                "caption": "Box Line Width",
+                "type": "pixel",
+                "value": "3",
+                "quotes": true
+            },
+            {
+                "name": "First_Line_Color",
+                "caption": "First Line Color",
+                "type": "color",
+                "value": "#e9b642",
+                "quotes": true
+            },
+            {
+                "name": "Second_Line_Color",
+                "caption": "Second Line Color",
+                "type": "color",
+                "value": "#ffffff",
+                "quotes": true
+            },
+            {
+                "name": "Line_Drawing_Effect",
+                "caption": "Line Drawing Effect",
+                "type": "string",
+                "value": "easeInOutSine",
+                "quotes": true
+            }                      
+        ],
+        [
+            {
+                "name": "title_text",
+                "caption": "first text",
                 "type": "text",
-                "value": "Header",
+                "value": "String Sticky",
+                "quotes": true
+            },
+            {
+                "name": "Title_text_color",
+                "caption": "First Text color",
+                "type": "color",
+                "value": "#e9b642",
+                "quotes": true
+            },
+            {
+                "name": "Title_text_size",
+                "caption": "First Text size",
+                "type": "pixel",
+                "value": "60",
+                "quotes": true
+            },
+            {
+                "name": "Title_text_Easing",
+                "caption": "First Text Animation Effect",
+                "type": "string",
+                "value": "easeInOutQuad",
+                "quotes": true
+            }
+        ],
+        [
+            {
+                "name": "desc_text",
+                "caption": "second text",
+                "type": "text",
+                "value": "Description",
                 "quotes": true
             },
             {
@@ -16,7 +104,21 @@
                 "type": "color",
                 "value": "#ffffff",
                 "quotes": true
-            }
-        ]
+            },
+            {
+                "name": "Desc_text_size",
+                "caption": "Second Text size",
+                "type": "pixel",
+                "value": "30",
+                "quotes": true
+            },
+            {
+                "name": "Desc_text_Easing",
+                "caption": "Second Text Animation Effect",
+                "type": "string",
+                "value": "easeInOutExpo",
+                "quotes": true
+            }                        
+        ]        
     ]
 }]

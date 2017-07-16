@@ -33,24 +33,41 @@
     </div>    
 
 <script>
-    
-    var request;
-    var options;
+
+	var data;    
+	var rectWidth, rectHeight, cornerRadius, lineWidth, lines=[],wholeLength,colors=[];
+	var animDuration, textAnimDuration, Delay;
+	var titlefontsize, descfontsize, title, desc, titlefont, descfont, textcolors=[];
+
+    var rectObj1,rectObj;
+    var titletext,desctext;
+
+    var rectX, rectY, lineSpacing, marginTop, marginLeft, textAnimStartingPoint;
+  
+    var arcEffect, titleEffect, descEffect;
 
     if (window.XMLHttpRequest) {
         request = new XMLHttpRequest();
     } else {
         request =  ActiveXObject("Microsoft.XMLHTTP");
     }
-    request.open("GET", "options.json", true);
-    if ((request.readyState===4) && (request.status===200)) {
-        options = JSON.parse(request.responseText);
-    }
-    request.send(null);
-    console.log(options);
+    request.open("GET", "options.json");
+    request.onreadystatechange = function() {
+	    if ((request.readyState == 4) && (request.status===200)) {
+	        var JSON_data = JSON.parse(request.responseText);
+	        
+	        data = JSON_data[0];
+	        document.title = data.caption;
+	    	setOptions(data);
+	    	initObjects();
+	    	initTimeline();
+	    }
+	}
 
-    var canvasEl = document.querySelector('canvas');
-    var ctx = canvasEl.getContext('2d');
+	request.send(null);
+
+  	canvasEl = document.querySelector('canvas');
+    ctx = canvasEl.getContext('2d');
 
     function setCanvasSize() {
         canvasEl.width = canvasEl.parentNode.offsetWidth;
@@ -59,75 +76,93 @@
         canvasEl.style.height = canvasEl.parentNode.offsetHeight + 'px';
     }
 
-    var colors = [
-        '#e9b642',
-        '#ffffff',
-        '#5A87FF',
-        '#FBF38C'
-    ];
+    function setOptions(options){
 
-    var easings = [
-        'easeInOutExpo',
-        'easeInOutSine',
-        'easeInOutQuad',
-        'easeInOutCubic'       
-    ];
+	    rectWidth = parseInt(data.options[0][0].value);
+	    rectHeight = parseInt(data.options[0][1].value);
+	    cornerRadius = parseInt(data.options[0][2].value);
+	    lineWidth = parseInt(data.options[0][3].value);
+	    colors.push(data.options[0][4].value);
+		colors.push(data.options[0][5].value);
 
-    var lineColor =2; // index of colors[], it paints the selected color to border.
+		title = data.options[1][0].value;
+		desc = data.options[2][0].value;
+	    textcolors.push(data.options[1][1].value);
+		textcolors.push(data.options[2][1].value);		
+		animDuration = data.duration;
+		textAnimDuration = animDuration;
+		Delay = data.delay;
+		titlefontsize = parseInt(data.options[1][2].value);
+		descfontsize = parseInt(data.options[2][2].value);
 
-    var rectX = 100;
-    var rectY = 500;
-    var rectWidth = 750;
-    var rectHeight = 150;
-    var cornerRadius = 20;
-    var lineWidth = 3;
+		arcEffect = data.options[0][6].value;
+		titleEffect = data.options[1][3].value;
+		descEffect = data.options[2][3].value;
 
-    // var rectX = options.rectX;
-    // var rectY = options.rectY;
-    // var rectWidth = options.rectWidth;
-    // var rectHeight = options.rectHeight;
-    // var cornerRadius = options.cornerRadius;
-    // var lineWidth = options.lineWidth;
-    
-    var animDuration = 1300; // duration of line animation
-    var wholeLength = 2 * (rectWidth + rectHeight + Math.PI * cornerRadius - cornerRadius * 4);//total length of arc
-    
-    var title = "Title";
-    var desc = "Description";
-    var titlefontsize = 65;
-    var descfontsize = 30;
-    var titlefont,descfont;
-    
-    var lineSpacing = 10;//the spacing between title and description
-    var marginTop = 20;
-    var marginLeft = 30;
-    var textAnimStartingPoint = -1000;
-    var textAnimDuration = 2000;
-    var titleDelay = 0;
-    var descDelay = 0;
-    var stopTime = 2000;
-    
-    /* animation effect (0~2) */
+	    rectX = data.startX;
+	    rectY = data.startY;
+	    lineSpacing = data.lineSpacing;
+	    marginTop = data.marginTop;
+	    marginLeft = data.marginLeft;
+	    textAnimStartingPoint = data.textAnimStartingPoint;
 
-    var arcEffect = 2;
-    var titleEffect = 0;
-    var descEffect = 0;
-    
-    var rectDelay = 200;
-    var lineOffset = 300;
-    var titleOffset = 200;
-    var descOffset = 500;
+		wholeLength = 2 * (rectWidth + rectHeight + Math.PI * cornerRadius - cornerRadius * 4);
+	    lines.push({x: rectX + rectWidth,y: rectY + rectHeight / 2, status: 0, len: rectHeight / 2 - cornerRadius});
+	    lines.push({x: rectX + rectWidth,y: rectY + rectHeight - cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
+	    lines.push({x: rectX + rectWidth - cornerRadius, y: rectY + rectHeight, status: 0, len: rectWidth - cornerRadius * 2});
+	    lines.push({x: rectX + cornerRadius, y:rectY + rectHeight, status: 1, len: Math.PI * cornerRadius / 2});
+	    lines.push({x: rectX, y: rectY + rectHeight - cornerRadius, status: 0, len: rectHeight - 2 * cornerRadius});
+	    lines.push({x: rectX, y: rectY + cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
+	    lines.push({x: rectX + cornerRadius, y: rectY, status:0, len: rectWidth - 2 * cornerRadius});
+	    lines.push({x: rectX + rectWidth-cornerRadius, y: rectY, status: 1, len: Math.PI * cornerRadius / 2});
+	    lines.push({x: rectX + rectWidth, y: rectY + cornerRadius, status: 0, len: rectHeight / 2 - cornerRadius});
+    }
 
-    var lines=[];
-    lines.push({x: rectX + rectWidth,y: rectY + rectHeight / 2, status: 0, len: rectHeight / 2 - cornerRadius});
-    lines.push({x: rectX + rectWidth,y: rectY + rectHeight - cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
-    lines.push({x: rectX + rectWidth - cornerRadius, y: rectY + rectHeight, status: 0, len: rectWidth - cornerRadius * 2});
-    lines.push({x: rectX + cornerRadius, y:rectY + rectHeight, status: 1, len: Math.PI * cornerRadius / 2});
-    lines.push({x: rectX, y: rectY + rectHeight - cornerRadius, status: 0, len: rectHeight - 2 * cornerRadius});
-    lines.push({x: rectX, y: rectY + cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
-    lines.push({x: rectX + cornerRadius, y: rectY, status:0, len: rectWidth - 2 * cornerRadius});
-    lines.push({x: rectX + rectWidth-cornerRadius, y: rectY, status: 1, len: Math.PI * cornerRadius / 2});
-    lines.push({x: rectX + rectWidth, y: rectY + cornerRadius, status: 0, len: rectHeight / 2 - cornerRadius});
+    function initObjects(){
+
+	    rectObj = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 0);
+	    rectObj1 = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 1);
+	    titletext = createText(title,textAnimStartingPoint, rectY + marginTop, titlefontsize,titlefont,0);
+		desctext = createText(desc,textAnimStartingPoint, rectY + marginTop + titlefontsize + lineSpacing, descfontsize,descfont,1);
+    }
+
+    function createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius, linewidth){
+        
+        var p = {};
+        p.routeProgress = 0;
+        p.colorDiff = 500;
+
+        p.draw = function(arc){
+
+            var tlen = 0;
+            clearCorner();
+
+            drawing(arc, 0);
+            drawing(arc-p.colorDiff, 1);
+
+        };
+        return p;
+    }
+
+    function createText(text, x, y, fontSize, font, textcolor){
+
+        var p = {};
+        p.x = x;
+        p.y = y;
+        p.fontSize = fontSize;
+        p.fillStyle = textcolors[textcolor];
+        p.draw = function() {
+            ctx.textBaseline = 'top';
+            ctx.clearRect(rectX + 2 * lineWidth / 3, p.y, rectWidth - lineWidth - marginLeft, p.fontSize * 1.2);
+            ctx.font = 'italic bold ' + p.fontSize + 'px Arial';
+            ctx.fillStyle = textcolors[textcolor];
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'italic';
+            ctx.fillText(text, p.x, p.y);
+            ctx.clearRect(0, rectY, rectX - lineWidth / 2, rectHeight);
+        };
+        return p;
+    }
 
     function clearCorner(){
         ctx.clearRect(rectX, rectY - cornerRadius, rectWidth , 2 * cornerRadius);
@@ -150,7 +185,6 @@
             
             if( arc > tlen )
             {
-            
                 if(lines[i].status==0){
                     var endPoint = (i + 1) % 8;
                     ctx.lineTo(lines[endPoint].x, lines[endPoint].y);
@@ -214,7 +248,7 @@
                             ctx.lineTo(rectX + rectWidth, rectY + cornerRadius + routeProgress);
                             break;
                         default:
-                            break;                                                                               
+                            break;                                                                        
                     }
                 }
             }
@@ -225,27 +259,6 @@
         }
     }
 
-    function createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius, linewidth){
-        
-        var p = {};
-        p.routeProgress = 0;
-        p.colorDiff = 500;
-        
-        p.draw = function(arc){
-
-            var tlen = 0;
-            clearCorner();
-
-            drawing(arc, 0);
-            drawing(arc-p.colorDiff, 1);
-
-        };
-        return p;
-    }
-
-    var rectObj = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 0);
-    var rectObj1 = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 1);
-
     function renderParticule(anim) {
         for (var i = 0; i < anim.animatables.length; i++) {
             var animation = anim.animatables[i].target;
@@ -253,95 +266,73 @@
         }        
     }
 
-    function createText(text, x, y, fontSize, font, textcolor){
-        var p = {};
-        p.x = x;
-        p.y = y;
-        p.fontSize = fontSize;
-        p.fillStyle = colors[textcolor];
-        p.draw = function() {
-            ctx.textBaseline = 'top';
-            ctx.clearRect(rectX + lineWidth / 2, p.y , rectWidth - lineWidth - marginLeft, p.fontSize * 1.1);
-            ctx.font = 'italic bold ' + p.fontSize + 'px Arial';
-            ctx.fillStyle = colors[textcolor];
-            ctx.textAlign = 'left';
-            ctx.fillStyle = 'italic';
-            ctx.fillText(text, p.x, p.y);
-            ctx.clearRect(0, rectY, rectX - lineWidth / 2, rectHeight);
-        };
-        return p;
-    }
-
     var mainOptions = {
         isPaused: false,
         isRendering: false
     };
 
-    var titletext = createText(title,textAnimStartingPoint, rectY + marginTop, titlefontsize,titlefont,0);        
-    var desctext = createText(desc,textAnimStartingPoint, rectY + marginTop + titlefontsize + lineSpacing, descfontsize,descfont,1);
-
     setCanvasSize();
 
+    function initTimeline(){
 
-    var timeline = anime.timeline({
-        loop: false,
-        autoplay: true,
-    });
-    timeline.add({
-        targets: rectObj,
-        duration: animDuration,
-        routeProgress: wholeLength,
-        colorDiff: 0,
-        easing: easings[arcEffect],
-        autoplay: true,
-        delay: rectDelay,
-        update: renderParticule,
-        offset: lineOffset
-      })
-    .add({
-        targets: titletext,
-        x:[textAnimStartingPoint, rectX + marginLeft],
-        delay: titleDelay,
-        duration: textAnimDuration,
-        easing: easings[titleEffect],
-        update: renderParticule,
-        offset: titleOffset
-    })
-    .add({
-        targets: desctext,
-        x: [textAnimStartingPoint, rectX + marginLeft],
-        duration: textAnimDuration,
-        delay: descDelay,
-        easing: easings[descEffect],
-        update: renderParticule,
-        offset: descOffset,
-        complete: function(anim) {
-            timeline.reverse();
-            mainOptions.isPaused = true;
-            setTimeout(function(){
-                mainOptions.isPaused = false;
-                timeline.play();
-            }, stopTime);
-        }        
-      });
+	    timeline = anime.timeline({
+	        loop: false,
+	        autoplay: true,
+	    });
 
-        var animationPlayToggle = function(){
-            timeline.restart();
-        };
 
-        var animationPlay = function(){
-            if( mainOptions.isPaused ){
-                return;
-            }
-            timeline.play();
-        };
+		timeline.add({
+	        targets: rectObj,
+	        duration: animDuration,
+	        routeProgress: wholeLength,
+	        colorDiff: 0,
+	        easing: arcEffect,
+	        update: renderParticule,
+	        offset: 0
+      	})
+	    .add({
+	        targets: titletext,
+	        x:[textAnimStartingPoint, rectX + marginLeft],
+	        duration: textAnimDuration,
+	        easing: titleEffect,
+	        update: renderParticule,
+	        offset: 0
+	    })
+	    .add({
+	        targets: desctext,
+	        x: [textAnimStartingPoint, rectX + marginLeft],
+	        duration: textAnimDuration,
+	        easing: descEffect,
+	        update: renderParticule,
+	        offset: 0,
+	        complete: function(anim) {
+	            timeline.reverse();
+	            mainOptions.isPaused = true;
+	            setTimeout(function(){
+	                mainOptions.isPaused = false;
+	                timeline.play();
+	            }, Delay);
+	        }        
+	    });
+	}
 
-        var animationPause = function(){
-            if( mainOptions.isPaused ){
-                return;
-            }
-            timeline.pause();
-        };
+    var animationPlayToggle = function(){
+        timeline.restart();
+    };
+
+    var animationPlay = function(){
+        if( mainOptions.isPaused ){
+            return;
+        }
+        timeline.play();
+    };
+
+    var animationPause = function(){
+        if( mainOptions.isPaused ){
+            return;
+        }
+        timeline.pause();
+    };	    	
 
   </script>
 </body>
