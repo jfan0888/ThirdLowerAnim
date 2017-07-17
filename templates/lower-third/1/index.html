@@ -35,16 +35,20 @@
 <script>
 
 	var data;    
-	var rectWidth, rectHeight, cornerRadius, lineWidth, lines=[],wholeLength,colors=[];
+	var rectWidth = 915 , rectHeight = 150, cornerRadius = 30, lineWidth = 4, lines=[],wholeLength;
 	var animDuration, textAnimDuration, Delay;
 	var titlefontsize, descfontsize, title, desc, titlefont, descfont, textcolors=[];
 
     var rectObj1,rectObj;
     var titletext,desctext;
 
-    var rectX, rectY, lineSpacing, marginTop, marginLeft, textAnimStartingPoint;
-  
-    var arcEffect, titleEffect, descEffect;
+    var colors = [
+        '#e9b642', // set title text and main line color
+        '#ffffff', // set second line color and description text color
+    ];
+
+    var rectX = 100, rectY = 500, lineSpacing = 10, marginTop = 20, marginLeft = 30, textAnimStartingPoint = -1000;
+    
     var canvasEl, ctx, timeline;
 
     if (window.XMLHttpRequest) {
@@ -79,35 +83,21 @@
 
     function setOptions(options){
 
-	    rectWidth = parseInt(data.options[0][0].value);
-	    rectHeight = parseInt(data.options[0][1].value);
-	    cornerRadius = parseInt(data.options[0][2].value);
-	    lineWidth = parseInt(data.options[0][3].value);
-	    colors.push(data.options[0][4].value);
-		colors.push(data.options[0][5].value);
+		title = data.options[0][0].value;
+		desc = data.options[1][0].value;
 
-		title = data.options[1][0].value;
-		desc = data.options[2][0].value;
-	    textcolors.push(data.options[1][1].value);
-		textcolors.push(data.options[2][1].value);		
+	    textcolors.push(data.options[0][1].value);
+		textcolors.push(data.options[1][1].value);		
+
 		animDuration = data.duration;
 		textAnimDuration = animDuration;
 		Delay = data.delay;
-		titlefontsize = parseInt(data.options[1][2].value);
-		descfontsize = parseInt(data.options[2][2].value);
 
-		arcEffect = data.options[0][6].value;
-		titleEffect = data.options[1][3].value;
-		descEffect = data.options[2][3].value;
-
-	    rectX = data.startX;
-	    rectY = data.startY;
-	    lineSpacing = data.lineSpacing;
-	    marginTop = data.marginTop;
-	    marginLeft = data.marginLeft;
-	    textAnimStartingPoint = data.textAnimStartingPoint;
+		titlefontsize = parseInt(data.options[0][2].value);
+		descfontsize = parseInt(data.options[1][2].value);
 
 		wholeLength = 2 * (rectWidth + rectHeight + Math.PI * cornerRadius - cornerRadius * 4);
+
 	    lines.push({x: rectX + rectWidth,y: rectY + rectHeight / 2, status: 0, len: rectHeight / 2 - cornerRadius});
 	    lines.push({x: rectX + rectWidth,y: rectY + rectHeight - cornerRadius, status: 1, len: Math.PI * cornerRadius / 2});
 	    lines.push({x: rectX + rectWidth - cornerRadius, y: rectY + rectHeight, status: 0, len: rectWidth - cornerRadius * 2});
@@ -287,7 +277,7 @@
 	        duration: animDuration,
 	        routeProgress: wholeLength,
 	        colorDiff: 0,
-	        easing: arcEffect,
+	        easing: 'easeInOutSine',
 	        update: renderParticule,
 	        offset: 0
       	})
@@ -295,7 +285,7 @@
 	        targets: titletext,
 	        x:[textAnimStartingPoint, rectX + marginLeft],
 	        duration: textAnimDuration,
-	        easing: titleEffect,
+	        easing: 'easeInOutExpo',
 	        update: renderParticule,
 	        offset: 0
 	    })
@@ -303,7 +293,7 @@
 	        targets: desctext,
 	        x: [textAnimStartingPoint, rectX + marginLeft],
 	        duration: textAnimDuration,
-	        easing: descEffect,
+	        easing: "easeInOutQuad",
 	        update: renderParticule,
 	        offset: 0,
 	        complete: function(anim) {
