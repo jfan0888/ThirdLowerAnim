@@ -65,7 +65,7 @@
 	        
 	        data = JSON_data[0];
 	        document.title = data.caption;
-	    	setOptions(data);
+	    	setOptions();
 	    	initObjects();
 	    	initTimeline();
 	    }
@@ -83,7 +83,7 @@
         canvasEl.style.height = canvasEl.parentNode.offsetHeight + 'px';
     }
 
-    function setOptions(options){
+    function setOptions(){
 
 		title = data.options[0][0].value;
 		desc = data.options[1][0].value;
