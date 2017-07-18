@@ -2,7 +2,7 @@
 <html>
 <head>
 
-  <title>Lower Third</title>
+  <title>Lower Third Animation</title>
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -39,7 +39,7 @@
 	var animDuration, textAnimDuration, Delay;
 	var titlefontsize, descfontsize, title, desc, titlefont, descfont, textcolors=[];
 
-    var rectObj1,rectObj;
+    var rectObj;
     var titletext,desctext;
 
     var colors = [
@@ -56,7 +56,9 @@
     } else {
         request =  ActiveXObject("Microsoft.XMLHTTP");
     }
+
     request.open("GET", "options.json");
+    
     request.onreadystatechange = function() {
 	    if ((request.readyState == 4) && (request.status===200)) {
 	        var JSON_data = JSON.parse(request.responseText);
@@ -112,7 +114,6 @@
     function initObjects(){
 
 	    rectObj = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 0);
-	    rectObj1 = createRect(rectX, rectY, rectWidth, rectHeight, cornerRadius,lineWidth, 1);
 	    titletext = createText(title,textAnimStartingPoint, rectY + marginTop, titlefontsize,titlefont,0);
 		desctext = createText(desc,textAnimStartingPoint, rectY + marginTop + titlefontsize + lineSpacing, descfontsize,descfont,1);
     }
