@@ -1,0 +1,22 @@
+{
+    "caption": "Sample",
+    "duration": 3000,
+    "options": [
+        [
+            {
+                "name": "text",
+                "caption": "Text",
+                "type": "text",
+                "value": "Header",
+                "quotes": true
+            },
+            {
+                "name": "text_color",
+                "caption": "Text color",
+                "type": "color",
+                "value": "#ffffff",
+                "quotes": true
+            }
+        ]
+    ]
+}
